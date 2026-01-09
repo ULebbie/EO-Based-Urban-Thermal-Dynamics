@@ -1,0 +1,14 @@
+# Earth Engine and local data exports
+*.tif
+*.tiff
+*.csv
+*.geojson
+*.shp
+*.zip
+
+# Python / Jupyter artifacts
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
