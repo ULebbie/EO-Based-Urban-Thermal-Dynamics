@@ -87,5 +87,5 @@ for (var y = 2004; y <= 2024; y++) {
   }
 }
 
-Map.centerObject(studyArea, 10);
+Map.centerObject(studyArea, 10); 
 print('UTFVI computation complete.');
