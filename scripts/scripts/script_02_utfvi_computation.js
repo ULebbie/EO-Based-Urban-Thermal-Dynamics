@@ -10,7 +10,7 @@
  *   Quantify thermal stress intensity and spatial
  *   heterogeneity across seasons and years.
  *******************************************************/
-
+   
 // --- 1. DATA LOADING ---
 
 var modisLST = ee.ImageCollection('MODIS/061/MOD11A2')
