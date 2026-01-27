@@ -1,7 +1,11 @@
 /*******************************************************
  * SCRIPT 2: Urban Thermal Field Variance Index (UTFVI)
- * Input: Seasonal MODIS LST (Script 1 output)
- * Period: 2004–2024
+ *
+ * Input:
+ *   Seasonal MODIS LST (derived directly from MOD11A2)
+ *
+ * Period:
+ *   2004–2024
  *
  * UTFVI Formula:
  *   UTFVI = (Ts − T_mean) / T_mean
@@ -11,20 +15,41 @@
  *   heterogeneity across seasons and years.
  *******************************************************/
 
-// --- 1. DATA LOADING ---
+
+// =====================================================
+// 1. STUDY AREA (USER INPUT REQUIRED)
+// =====================================================
+
+// Load your own study area from Earth Engine Assets
+// Replace the asset path below with your own
+var studyArea = ee.FeatureCollection(
+  'projects/YOUR_USERNAME/assets/YOUR_STUDY_AREA'
+);
+
+// Example (optional):
+// var studyArea = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017')
+//                   .filter(ee.Filter.eq('country_na', 'India'));
+
+Map.centerObject(studyArea, 10);
+
+
+// =====================================================
+// 2. MODIS LST DATA PREPARATION
+// =====================================================
 
 var modisLST = ee.ImageCollection('MODIS/061/MOD11A2')
   .filter(ee.Filter.calendarRange(2003, 2024, 'year'))
   .select(['LST_Day_1km', 'QC_Day']);
 
-var studyArea = ee.FeatureCollection('projects/ee-lebbieunis/assets/Bbs_AOI');
 
+// Quality masking and unit conversion
 var maskGoodQuality = function(image) {
   var qc = image.select('QC_Day');
   var mandatoryQA = qc.bitwiseAnd(3);
   var qualityMask = mandatoryQA.lte(1);
 
-  return image.updateMask(qualityMask)
+  return image
+    .updateMask(qualityMask)
     .select('LST_Day_1km')
     .multiply(0.02)
     .subtract(273.15)
@@ -33,7 +58,10 @@ var maskGoodQuality = function(image) {
 
 var filteredLST = modisLST.map(maskGoodQuality);
 
-// --- 2. UTFVI FUNCTION ---
+
+// =====================================================
+// 3. UTFVI COMPUTATION FUNCTION
+// =====================================================
 
 var computeUTFVI = function(seasonLST, seasonName, year) {
 
@@ -48,12 +76,15 @@ var computeUTFVI = function(seasonLST, seasonName, year) {
     }).get('LST_Day_1km')
   );
 
-  var utfvi = meanLST.subtract(Tmean).divide(Tmean).rename('UTFVI');
+  var utfvi = meanLST
+    .subtract(Tmean)
+    .divide(Tmean)
+    .rename('UTFVI');
 
   Export.image.toDrive({
     image: utfvi,
     description: 'UTFVI_' + seasonName + '_' + year,
-    folder: 'Bbs_Analysis_2',
+    folder: 'UTFVI_Results',
     fileNamePrefix: 'UTFVI_' + seasonName + '_' + year,
     region: studyArea.geometry(),
     scale: 1000,
@@ -63,7 +94,10 @@ var computeUTFVI = function(seasonLST, seasonName, year) {
   return utfvi;
 };
 
-// --- 3. RUN ANALYSIS ---
+
+// =====================================================
+// 4. RUN ANALYSIS
+// =====================================================
 
 for (var y = 2004; y <= 2024; y++) {
 
@@ -81,11 +115,14 @@ for (var y = 2004; y <= 2024; y++) {
 
   // Display only boundary years
   if (y === 2004 || y === 2024) {
-    var vis = {min: -0.05, max: 0.05, palette: ['blue', 'white', 'red']};
+    var vis = {
+      min: -0.05,
+      max: 0.05,
+      palette: ['blue', 'white', 'red']
+    };
     Map.addLayer(summerUTFVI, vis, 'Summer UTFVI ' + y, false);
     Map.addLayer(winterUTFVI, vis, 'Winter UTFVI ' + y, false);
   }
 }
 
-Map.centerObject(studyArea, 10);
 print('UTFVI computation complete.');
