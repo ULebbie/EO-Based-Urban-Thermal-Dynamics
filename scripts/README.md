@@ -8,7 +8,7 @@ urban thermal environment analysis.
 1. **script_01_seasonal_modis_lst.js**  
    Seasonal mean MODIS Land Surface Temperature (Summer & Winter), 2004–2024.
 
-2. **script_02_utfvi.js**  
+2. **script_02_utfvi_computation.js**  
    Urban Thermal Field Variance Index (UTFVI) computation based on seasonal LST.
 
 3. **script_03_lst_ndvi_relationship.js**  
