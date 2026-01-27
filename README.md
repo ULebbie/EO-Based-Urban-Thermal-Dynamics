@@ -55,3 +55,5 @@ to any city by supplying a user-defined study area.
 ├── outputs/
 │   └── Exported rasters and tables
 └── README.md
+
+These workflows are designed to be adaptable to any urban study area by replacing the study area asset and adjusting temporal parameters.
